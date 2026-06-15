@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django / secrets
+backend/.env
+backend/db.sqlite3
+backend/e2e.sqlite3
+backend/client_secrets.json
+backend/token.json
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.env
+frontend/*.tsbuildinfo
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/.playwright/
+
+# Logs / OS
+logs/*.log
+.DS_Store
