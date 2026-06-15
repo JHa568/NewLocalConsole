@@ -41,6 +41,35 @@ jobs:
       - run: npm run test
       - run: npm run build
 
+  docker:
+    name: Docker (build + smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create backend .env for Docker build
+        run: |
+          cp backend/.env.example backend/.env
+          sed -i 's/^SECRET_KEY=.*/SECRET_KEY=ci-test-secret-key/' backend/.env
+          sed -i 's/^# DEBUG=False/DEBUG=False/' backend/.env
+          sed -i 's/^# ALLOWED_HOSTS=localhost,127.0.0.1,backend/ALLOWED_HOSTS=localhost,127.0.0.1,backend/' backend/.env
+          sed -i 's/^# CORS_ALLOWED_ORIGINS=http:\/\/localhost:8080/CORS_ALLOWED_ORIGINS=http:\/\/localhost:8080/' backend/.env
+          sed -i 's/^# WEBAUTHN_ORIGIN=http:\/\/localhost:8080/WEBAUTHN_ORIGIN=http:\/\/localhost:8080/' backend/.env
+          sed -i 's/^# SQLITE_NAME=data\/db.sqlite3/SQLITE_NAME=data\/db.sqlite3/' backend/.env
+      - name: Build images
+        run: docker compose build
+      - name: Start stack and smoke-test
+        run: |
+          docker compose up -d
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/api/health/; then
+              echo "Health check passed"
+              break
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:8080/api/health/
+          docker compose down
+
   e2e:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest

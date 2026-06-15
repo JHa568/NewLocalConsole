@@ -106,6 +106,79 @@ location / {
 
 Point `VITE_CASAOS_URL` at that proxied origin.
 
+## Running with Docker
+
+The whole stack (Django + nginx + React SPA) can be started with a single command.
+
+### Quick start
+
+```bash
+# 1. Configure the backend
+cp backend/.env.example backend/.env
+# Edit backend/.env — at minimum set SECRET_KEY and uncomment the Docker block.
+
+# 2. (Optional) Set CasaOS URL if you use the Console tab.
+#    VITE_CASAOS_URL is baked into the frontend image at build time.
+export VITE_CASAOS_URL=http://your-casaos-host/
+
+# 3. Build images and start
+docker compose up --build
+```
+
+The app is then available at **http://localhost:8080**.
+
+### Architecture
+
+```
+Browser → nginx :8080
+           ├─ /api/*  → gunicorn :8000  (backend container)
+           └─ /*      → React SPA (compiled static files in nginx)
+```
+
+The backend container mounts a named volume (`backend-data`) at `/app/data` where
+it stores `db.sqlite3`. On first start `migrate` runs automatically.
+
+### Google Calendar credentials
+
+Copy `client_secrets.json` and (after `authorize_google`) `token.json` into the
+volume's data directory. The easiest way is to copy them into the running container:
+
+```bash
+docker compose cp client_secrets.json backend:/app/data/
+docker compose cp token.json backend:/app/data/
+```
+
+Then ensure `backend/.env` has:
+```
+GOOGLE_CLIENT_SECRETS_PATH=data/client_secrets.json
+GOOGLE_TOKEN_PATH=data/token.json
+```
+
+### VITE_CASAOS_URL is a build-time argument
+
+Vite inlines environment variables at compile time. Changing `VITE_CASAOS_URL`
+requires a frontend rebuild:
+
+```bash
+VITE_CASAOS_URL=http://new-host/ docker compose up --build frontend
+```
+
+### WebAuthn on non-localhost
+
+`localhost` is a special secure context that browsers allow WebAuthn on.
+For remote/non-localhost access you **must** serve over HTTPS. Terminate TLS at a
+reverse proxy in front of nginx and update `WEBAUTHN_RP_ID` + `WEBAUTHN_ORIGIN` in
+`backend/.env` to match your domain.
+
+### Persistence across restarts
+
+The named volume `backend-data` survives `docker compose down`. To wipe the
+database and start fresh:
+
+```bash
+docker compose down -v
+```
+
 ## Testing
 
 ```bash

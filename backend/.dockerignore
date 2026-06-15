@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+staticfiles/
+client_secrets.json
+token.json
+tests/
