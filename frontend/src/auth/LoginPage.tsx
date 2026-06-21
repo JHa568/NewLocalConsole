@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from "../components/Logo";
 import { useAuth } from "./AuthContext";
 
 export default function LoginPage() {
@@ -26,49 +27,51 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center p-4">
-      <form className="glass w-[360px] p-7" onSubmit={onSubmit}>
-        <span className="mb-4 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-warm to-accent text-base font-bold text-[#0b1220]">
-          NL
-        </span>
-        <h1 className="mt-0 mb-1 text-2xl">NewLocalConsole</h1>
-        <p className="mb-2 text-sm text-muted">
-          Sign in with your password and security key.
-        </p>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <form className="glass w-[380px] max-w-full p-8" onSubmit={onSubmit}>
+        <div className="mb-6 flex items-center gap-3">
+          <Logo className="h-9 w-9" />
+          <div>
+            <h1 className="m-0 text-lg leading-tight">Patientia</h1>
+            <p className="m-0 text-xs text-muted">Sign in to continue</p>
+          </div>
+        </div>
 
-        <label>
-          Username
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoFocus
-            required
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+        <div className="flex flex-col gap-3">
+          <label className="my-0">
+            Username
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoFocus
+              required
+            />
+          </label>
+          <label className="my-0">
+            Password
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </label>
+        </div>
 
         {status === "mfa" && (
-          <p className="text-sm text-muted" role="status">
+          <p className="mt-3 mb-0 text-sm text-muted" role="status">
             Touch your YubiKey to continue…
           </p>
         )}
         {error && (
-          <p className="text-sm text-bad" role="alert">
+          <p className="mt-3 mb-0 text-sm text-bad" role="alert">
             {error}
           </p>
         )}
 
         <button
           type="submit"
-          className="mt-2 w-full"
+          className="mt-5 w-full"
           disabled={status === "submitting" || status === "mfa"}
         >
           {status === "idle" ? "Sign in" : "Verifying…"}

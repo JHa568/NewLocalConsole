@@ -1,5 +1,5 @@
 """
-Django settings for the NewLocalConsole project.
+Django settings for the Patientia project.
 """
 
 import os
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -91,12 +92,26 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / env("SQLITE_NAME", "db.sqlite3"),
+# Postgres is used when POSTGRES_DB is set (docker); otherwise sqlite (bare local dev).
+POSTGRES_DB = env("POSTGRES_DB")
+if POSTGRES_DB:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": POSTGRES_DB,
+            "USER": env("POSTGRES_USER", "postgres"),
+            "PASSWORD": env("POSTGRES_PASSWORD", ""),
+            "HOST": env("POSTGRES_HOST", "localhost"),
+            "PORT": env("POSTGRES_PORT", "5432"),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / env("SQLITE_NAME", "db.sqlite3"),
+        }
+    }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -113,6 +128,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
@@ -152,7 +169,7 @@ CORS_ALLOW_CREDENTIALS = True
 # WebAuthn (YubiKey FIDO2)
 # ---------------------------------------------------------------------------
 WEBAUTHN_RP_ID = env("WEBAUTHN_RP_ID", "localhost")
-WEBAUTHN_RP_NAME = env("WEBAUTHN_RP_NAME", "NewLocalConsole")
+WEBAUTHN_RP_NAME = env("WEBAUTHN_RP_NAME", "Patientia")
 WEBAUTHN_ORIGIN = env("WEBAUTHN_ORIGIN", "http://localhost:5173")
 
 
@@ -175,6 +192,6 @@ GOOGLE_SCOPES = [
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "newlocalconsole-cache",
+        "LOCATION": "patientia-cache",
     }
 }

@@ -86,7 +86,7 @@ export default function Dashboard() {
   const allocationBase = summary.portfolio_value + summary.balances_total || 1;
 
   return (
-    <div className="p-6" data-testid="dashboard">
+    <div className="p-3 sm:p-6" data-testid="dashboard">
       <h2 className="mb-4 text-xl">Dashboard</h2>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
@@ -145,8 +145,8 @@ export default function Dashboard() {
               No stock positions yet. Add some in the Finance tab.
             </div>
           ) : (
-            <div className="glass overflow-hidden">
-              <table className="w-full border-collapse text-sm">
+            <div className="glass overflow-x-auto">
+              <table className="w-full min-w-[480px] border-collapse text-sm">
                 <thead>
                   <tr>
                     <th className="border-b border-border p-3 text-left text-xs font-medium tracking-wide text-muted uppercase">

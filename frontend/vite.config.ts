@@ -10,7 +10,7 @@ export default defineConfig({
     proxy: {
       // Forward API calls to Django in development to avoid CORS.
       "/api": {
-        target: "http://localhost:8000",
+        target: process.env.VITE_PROXY_TARGET ?? "http://localhost:8000",
         changeOrigin: true,
       },
     },

@@ -1,4 +1,4 @@
-# NewLocalConsole
+# Patientia
 
 A self-hosted personal console: a **Django REST** backend and a **React +
 TypeScript** single-page app. Access is gated behind username/password **plus a
@@ -120,6 +120,30 @@ cd frontend && npm run test
 # hardware or external accounts required.
 cd frontend && npm run e2e
 ```
+
+## Docker
+
+Requires `backend/.env` and `frontend/.env` to exist (`cp .env.example .env` in
+each, as in Setup above).
+
+```bash
+# Dev — hot reload, Postgres, backend :8000, frontend :5173
+docker compose up
+
+# Run test suites in the dev containers
+docker compose run --rm backend pytest -q
+docker compose run --rm frontend npm run test
+
+# End-to-end, in one combined Playwright + Django image
+docker build -f docker/e2e.Dockerfile -t patientia-e2e .
+docker run --rm patientia-e2e
+
+# Prod — Postgres, gunicorn, nginx serving the built SPA + proxying /api
+POSTGRES_PASSWORD=<secret> docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Prod talks to Postgres (`POSTGRES_HOST` set); without it, `DATABASES` falls back
+to sqlite for plain `manage.py runserver` use.
 
 ## Project layout
 

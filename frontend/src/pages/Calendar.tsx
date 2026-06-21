@@ -9,8 +9,21 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import confetti from "canvas-confetti";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
+
+function burstConfetti(x: number, y: number) {
+  confetti({
+    particleCount: 80,
+    spread: 70,
+    startVelocity: 35,
+    origin: {
+      x: x / window.innerWidth,
+      y: y / window.innerHeight,
+    },
+  });
+}
 
 interface GEvent {
   id: string;
@@ -87,8 +100,8 @@ export default function CalendarPage() {
     tasks.filter((t) => t.due && isSameDay(parseISO(t.due), day));
 
   return (
-    <div className="p-6" data-testid="calendar">
-      <div className="flex items-center justify-between gap-3">
+    <div className="p-3 sm:p-6" data-testid="calendar">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl">Calendar</h2>
         <div className="flex items-center gap-2">
           <button
@@ -119,18 +132,18 @@ export default function CalendarPage() {
         </div>
       )}
 
-      <div className="mt-4 grid grid-cols-[1fr_300px] gap-4">
-        <div className="grid grid-cols-7 gap-1.5">
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_300px]">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <div key={d} className="p-1 text-center text-xs font-medium text-muted">
-              {d}
+            <div key={d} className="p-1 text-center text-[10px] font-medium text-muted sm:text-xs">
+              {d.slice(0, 3)}
             </div>
           ))}
           {days.map((day) => (
             <button
               key={day.toISOString()}
               className={[
-                "flex min-h-[92px] flex-col items-stretch gap-1 rounded-xl border p-1.5 text-left text-text transition-colors",
+                "flex min-h-[56px] flex-col items-stretch gap-1 rounded-xl border p-1 text-left text-text transition-colors sm:min-h-[92px] sm:p-1.5",
                 isSameDay(day, selected)
                   ? "border-accent bg-panel-2"
                   : "border-border bg-panel hover:bg-panel-2/70",
@@ -142,7 +155,7 @@ export default function CalendarPage() {
               {eventsOn(day).slice(0, 3).map((e) => (
                 <span
                   key={e.id}
-                  className="overflow-hidden truncate rounded-full bg-accent/20 px-1.5 py-0.5 text-[11px] text-accent"
+                  className="hidden overflow-hidden truncate rounded-full bg-accent/20 px-1.5 py-0.5 text-[11px] text-accent sm:block"
                   title={e.summary}
                 >
                   {e.summary || "(untitled)"}
@@ -151,12 +164,15 @@ export default function CalendarPage() {
               {tasksOn(day).slice(0, 2).map((t) => (
                 <span
                   key={t.id}
-                  className="overflow-hidden truncate rounded-full bg-warm/20 px-1.5 py-0.5 text-[11px] text-warm"
+                  className="hidden overflow-hidden truncate rounded-full bg-warm/20 px-1.5 py-0.5 text-[11px] text-warm sm:block"
                   title={t.title}
                 >
                   ☑ {t.title}
                 </span>
               ))}
+              {(eventsOn(day).length > 0 || tasksOn(day).length > 0) && (
+                <span className="mt-auto h-1.5 w-1.5 self-center rounded-full bg-accent sm:hidden" />
+              )}
             </button>
           ))}
         </div>
@@ -207,9 +223,9 @@ function DayDetail({
             key={e.id}
             className="flex items-center justify-between gap-3 border-b border-border py-2"
           >
-            <span className="text-sm">{e.summary || "(untitled)"}</span>
+            <span className="min-w-0 flex-1 truncate text-sm">{e.summary || "(untitled)"}</span>
             <button
-              className="bg-bad/90 px-2 py-1 text-xs"
+              className="shrink-0 bg-bad/90 px-2 py-1 text-xs"
               onClick={async () => {
                 await api.delete(`/calendar/events/${e.id}/`);
                 onChanged();
@@ -230,11 +246,16 @@ function DayDetail({
             key={t.id}
             className="flex items-center justify-between gap-3 border-b border-border py-2"
           >
-            <label className="m-0 flex flex-row items-center gap-1.5 text-sm text-text">
+            <label className="m-0 flex min-w-0 flex-1 flex-row items-center gap-1.5 text-sm text-text">
               <input
+                className="shrink-0"
                 type="checkbox"
                 checked={t.status === "completed"}
                 onChange={async (e) => {
+                  if (e.target.checked) {
+                    const r = e.target.getBoundingClientRect();
+                    burstConfetti(r.left + r.width / 2, r.top + r.height / 2);
+                  }
                   await api.patch(`/calendar/tasks/${t.id}/`, {
                     title: t.title,
                     due: t.due,
@@ -243,10 +264,10 @@ function DayDetail({
                   onChanged();
                 }}
               />
-              {t.title}
+              <span className="min-w-0 truncate">{t.title}</span>
             </label>
             <button
-              className="bg-bad/90 px-2 py-1 text-xs"
+              className="shrink-0 bg-bad/90 px-2 py-1 text-xs"
               onClick={async () => {
                 await api.delete(`/calendar/tasks/${t.id}/`);
                 onChanged();
@@ -323,7 +344,7 @@ function CreateDialog({
               key={t}
               className={
                 type === t
-                  ? "flex-1 rounded-full bg-accent px-2 py-1.5 text-xs text-[#0b1220]"
+                  ? "flex-1 rounded-full bg-accent px-2 py-1.5 text-xs text-ink"
                   : "flex-1 rounded-full bg-transparent px-2 py-1.5 text-xs text-muted"
               }
               onClick={() => setType(t)}
@@ -366,7 +387,7 @@ function CreateDialog({
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            className="bg-transparent p-1 text-accent"
+            className="bg-transparent p-1 text-muted hover:text-text"
             onClick={onClose}
           >
             Cancel

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../api/client";
 import Dashboard from "./Dashboard";
@@ -36,7 +36,8 @@ describe("Dashboard", () => {
     await waitFor(() => expect(screen.getByTestId("dashboard")).toBeInTheDocument());
     expect(screen.getByText("Monthly income")).toBeInTheDocument();
     expect(screen.getByText("Paid")).toBeInTheDocument();
-    expect(screen.getByText("CBA.AX")).toBeInTheDocument();
-    expect(screen.getByText("1.2%")).toBeInTheDocument();
+    const table = screen.getByRole("table");
+    expect(within(table).getByText("CBA.AX")).toBeInTheDocument();
+    expect(within(table).getByText("1.2%")).toBeInTheDocument();
   });
 });

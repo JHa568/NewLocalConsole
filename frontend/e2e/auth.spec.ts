@@ -14,7 +14,7 @@ test("password login, register key, then key-gated login", async ({ page }) => {
   await expect(page.getByTestId("dashboard")).toBeVisible();
 
   // 2. Register a security key via the virtual authenticator.
-  await page.getByRole("link", { name: "Security keys" }).click();
+  await page.getByRole("link", { name: "Settings" }).click();
   await page.getByRole("button", { name: "Register a new key" }).click();
   await expect(page.getByText("Added", { exact: false })).toBeVisible();
 

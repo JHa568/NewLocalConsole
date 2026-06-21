@@ -56,7 +56,7 @@ export default function Finance() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4 p-6" data-testid="finance">
+    <div className="flex flex-col gap-4 p-3 sm:p-6" data-testid="finance">
       <h2 className="text-xl">Finance</h2>
 
       <section className="glass p-5">
@@ -66,17 +66,17 @@ export default function Finance() {
           {income.map((it) => (
             <li
               key={it.id}
-              className="flex items-center justify-between gap-3 border-b border-border py-2.5 text-sm last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-2.5 text-sm last:border-b-0"
             >
-              <span>
+              <span className="min-w-0 truncate">
                 {it.source} — <span className="tabular-nums">{money(Number(it.amount))}</span>{" "}
                 ({it.period})
               </span>
-              <span className="pill bg-panel-2 text-muted tabular-nums">
+              <span className="pill shrink-0 bg-panel-2 text-muted tabular-nums">
                 {money(it.monthly_equivalent)}/mo
               </span>
               <button
-                className="bg-bad/90 px-2 py-1 text-xs"
+                className="shrink-0 bg-bad/90 px-2 py-1 text-xs"
                 onClick={async () => {
                   await api.delete(`/finance/income/${it.id}/`);
                   loadAll();
@@ -96,15 +96,15 @@ export default function Finance() {
           {rent.map((it) => (
             <li
               key={it.id}
-              className="flex items-center justify-between gap-3 border-b border-border py-2.5 text-sm last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-2.5 text-sm last:border-b-0"
             >
-              <span>
+              <span className="min-w-0 truncate">
                 {it.period} — <span className="tabular-nums">{money(Number(it.amount))}</span>
               </span>
-              <span className={`pill ${it.paid ? "bg-good/15 text-good" : "bg-bad/15 text-bad"}`}>
+              <span className={`pill shrink-0 ${it.paid ? "bg-good/15 text-good" : "bg-bad/15 text-bad"}`}>
                 {it.paid ? "Paid" : "Outstanding"}
               </span>
-              <label className="m-0 flex flex-row items-center gap-1.5 text-text">
+              <label className="m-0 flex shrink-0 flex-row items-center gap-1.5 text-text">
                 <input
                   type="checkbox"
                   checked={it.paid}
@@ -116,7 +116,7 @@ export default function Finance() {
                 Paid
               </label>
               <button
-                className="bg-bad/90 px-2 py-1 text-xs"
+                className="shrink-0 bg-bad/90 px-2 py-1 text-xs"
                 onClick={async () => {
                   await api.delete(`/finance/rent/${it.id}/`);
                   loadAll();
@@ -132,7 +132,8 @@ export default function Finance() {
       <section className="glass p-5">
         <h3 className="mb-3 text-base">Stock portfolio</h3>
         <AddStock onAdded={loadAll} />
-        <table className="mt-3 w-full border-collapse text-sm">
+        <div className="mt-3 -mx-5 overflow-x-auto px-5">
+        <table className="w-full border-collapse text-sm">
           <thead>
             <tr>
               <th className="border-b border-border p-2 text-left text-xs font-medium tracking-wide text-muted uppercase">
@@ -180,6 +181,7 @@ export default function Finance() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="glass p-5">
@@ -189,13 +191,13 @@ export default function Finance() {
           {balances.map((b) => (
             <li
               key={b.id}
-              className="flex items-center justify-between gap-3 border-b border-border py-2.5 text-sm last:border-b-0"
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-border py-2.5 text-sm last:border-b-0"
             >
-              <span>
+              <span className="min-w-0 truncate">
                 {b.label} — <span className="tabular-nums">{money(Number(b.amount))}</span>
               </span>
               <button
-                className="bg-bad/90 px-2 py-1 text-xs"
+                className="shrink-0 bg-bad/90 px-2 py-1 text-xs"
                 onClick={async () => {
                   await api.delete(`/finance/balances/${b.id}/`);
                   loadAll();

@@ -10,25 +10,26 @@
   --color-panel-2: rgba(255, 255, 255, 0.09);
   --color-text: #eef1f7;
   --color-muted: #97a3ba;
-  --color-accent: #6ea8fe;
+  --color-accent: #8eaede;
   --color-warm: #f3c98b;
   --color-good: #4ade80;
-  --color-bad: #f87171;
+  --color-bad: #de8c8c;
+  --color-ink: #161a22;
   --color-border: rgba(255, 255, 255, 0.09);
 }
 
 html[data-theme="light"] {
-  --color-bg: #f3f5fb;
-  --color-bg-2: #ffffff;
-  --color-panel: rgba(255, 255, 255, 0.8);
-  --color-panel-2: rgba(15, 23, 42, 0.045);
-  --color-text: #0f172a;
-  --color-muted: #64748b;
-  --color-accent: #3b6fe0;
+  --color-bg: #f1f3f9;
+  --color-bg-2: #f7f9fd;
+  --color-panel: rgba(247, 249, 253, 0.8);
+  --color-panel-2: rgba(31, 41, 71, 0.045);
+  --color-text: #1f2947;
+  --color-muted: #5b6680;
+  --color-accent: #6b88c7;
   --color-warm: #c9852f;
   --color-good: #16a34a;
-  --color-bad: #dc2626;
-  --color-border: rgba(15, 23, 42, 0.08);
+  --color-bad: #ca7373;
+  --color-border: rgba(31, 41, 71, 0.08);
 }
 
 @layer base {
@@ -40,17 +41,11 @@ html[data-theme="light"] {
   }
   body {
     @apply m-0 min-h-screen text-text font-sans antialiased;
-    background:
-      radial-gradient(at 85% 8%, rgba(243, 201, 139, 0.12), transparent 55%),
-      radial-gradient(at 8% 90%, rgba(110, 168, 254, 0.14), transparent 55%),
-      linear-gradient(180deg, #0b1220 0%, #131c30 45%, #0c1322 100%);
+    background: linear-gradient(180deg, #0b1220 0%, #131c30 45%, #0c1322 100%);
     background-attachment: fixed;
   }
   html[data-theme="light"] body {
-    background:
-      radial-gradient(at 85% 8%, rgba(201, 133, 47, 0.08), transparent 55%),
-      radial-gradient(at 8% 90%, rgba(59, 111, 224, 0.08), transparent 55%),
-      linear-gradient(180deg, #f3f5fb 0%, #eef1f8 45%, #f6f7fb 100%);
+    background: linear-gradient(180deg, #f1f3f9 0%, #f7f9fd 45%, #f1f3f9 100%);
   }
   h1,
   h2,
@@ -59,7 +54,7 @@ html[data-theme="light"] {
     @apply font-semibold tracking-tight;
   }
   button {
-    @apply cursor-pointer rounded-full border-none bg-accent px-4 py-2 text-sm font-medium text-[#0b1220] transition-[filter,transform] duration-150;
+    @apply cursor-pointer rounded-full border-none bg-accent px-4 py-2 text-sm font-medium text-ink transition-[filter,transform] duration-150;
   }
   button:hover {
     filter: brightness(1.08);
@@ -94,5 +89,164 @@ html[data-theme="light"] {
   }
   .pill {
     @apply rounded-full px-2.5 py-1 text-xs font-medium;
+  }
+}
+
+@keyframes page-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-slide-in 0.25s ease-out;
+}
+
+@keyframes nav-icon-dashboard {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(0.85) rotate(-8deg); }
+  50% { transform: scale(1.15) rotate(6deg); }
+  75% { transform: scale(0.95) rotate(-3deg); }
+}
+
+@keyframes nav-icon-finance {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20% { transform: translateY(-3px) rotate(-12deg); }
+  40% { transform: translateY(1px) rotate(10deg); }
+  60% { transform: translateY(-2px) rotate(-6deg); }
+  80% { transform: translateY(0) rotate(3deg); }
+}
+
+@keyframes nav-icon-calendar {
+  0%, 100% { transform: rotateX(0deg) scaleY(1); }
+  50% { transform: rotateX(35deg) scaleY(0.7); }
+}
+
+@keyframes nav-icon-console {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(4px); }
+  60% { transform: translateX(-1px); }
+}
+
+@keyframes nav-icon-settings {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+
+.nav-icon {
+  display: inline-block;
+  transform-origin: 50% 50%;
+}
+
+.group:hover .nav-icon-dashboard {
+  animation: nav-icon-dashboard 0.6s ease-in-out;
+}
+.group:hover .nav-icon-finance {
+  animation: nav-icon-finance 0.6s ease-in-out;
+}
+.group:hover .nav-icon-calendar {
+  animation: nav-icon-calendar 0.5s ease-in-out;
+  perspective: 40px;
+}
+.group:hover .nav-icon-console {
+  animation: nav-icon-console 0.45s ease-in-out;
+}
+.group:hover .nav-icon-settings {
+  animation: nav-icon-settings 0.4s ease-in-out;
+}
+
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+html[data-theme="light"] .bg-blobs {
+  mix-blend-mode: normal;
+}
+
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform;
+}
+
+.bg-blob-1 {
+  top: -12%;
+  left: -8%;
+  width: 42vmax;
+  height: 42vmax;
+  background: var(--color-accent);
+  opacity: 0.35;
+  animation: blob-drift-1 14s ease-in-out infinite;
+}
+.bg-blob-2 {
+  top: 45%;
+  left: 58%;
+  width: 36vmax;
+  height: 36vmax;
+  background: var(--color-warm);
+  opacity: 0.3;
+  animation: blob-drift-2 17s ease-in-out infinite;
+}
+.bg-blob-3 {
+  bottom: -18%;
+  left: 18%;
+  width: 38vmax;
+  height: 38vmax;
+  background: var(--color-good);
+  opacity: 0.22;
+  animation: blob-drift-3 20s ease-in-out infinite;
+}
+.bg-blob-4 {
+  top: 5%;
+  left: 35%;
+  width: 26vmax;
+  height: 26vmax;
+  background: var(--color-accent);
+  opacity: 0.18;
+  animation: blob-drift-4 11s ease-in-out infinite;
+}
+
+html[data-theme="light"] .bg-blob-1 { opacity: 0.55; }
+html[data-theme="light"] .bg-blob-2 { opacity: 0.5; }
+html[data-theme="light"] .bg-blob-3 { opacity: 0.4; }
+html[data-theme="light"] .bg-blob-4 { opacity: 0.32; }
+
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(16vw, 12vh) scale(1.2); }
+  50% { transform: translate(6vw, 28vh) scale(0.85); }
+  75% { transform: translate(-12vw, 16vh) scale(1.1); }
+}
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  30% { transform: translate(-18vw, 10vh) scale(0.8); }
+  60% { transform: translate(-8vw, -20vh) scale(1.25); }
+  85% { transform: translate(10vw, -6vh) scale(0.95); }
+}
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  20% { transform: translate(14vw, -14vh) scale(1.15); }
+  55% { transform: translate(-10vw, -8vh) scale(0.9); }
+  80% { transform: translate(-16vw, 6vh) scale(1.05); }
+}
+@keyframes blob-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  35% { transform: translate(-12vw, 18vh) scale(1.3); }
+  70% { transform: translate(14vw, 10vh) scale(0.8); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-blob {
+    animation: none !important;
   }
 }

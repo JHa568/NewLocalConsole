@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import LoginPage from "./auth/LoginPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
-import RegisterKeyPage from "./auth/RegisterKeyPage";
+import BackgroundBlobs from "./components/BackgroundBlobs";
 import Layout from "./components/Layout";
 import CalendarPage from "./pages/Calendar";
 import Console from "./pages/Console";
@@ -15,6 +15,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <BackgroundBlobs />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
@@ -23,7 +24,6 @@ export default function App() {
               <Route path="/finance" element={<Finance />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/console" element={<Console />} />
-              <Route path="/security" element={<RegisterKeyPage />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           </Route>
