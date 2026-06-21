@@ -87,28 +87,42 @@ export default function CalendarPage() {
     tasks.filter((t) => t.due && isSameDay(parseISO(t.due), day));
 
   return (
-    <div className="page" data-testid="calendar">
-      <div className="row spread">
-        <h2>Calendar</h2>
-        <div className="cal-controls">
-          <button onClick={() => setCursor(addMonths(cursor, -1))}>‹</button>
-          <strong>{format(cursor, "MMMM yyyy")}</strong>
-          <button onClick={() => setCursor(addMonths(cursor, 1))}>›</button>
-          <button onClick={() => setShowDialog(true)}>+ Add</button>
+    <div className="p-6" data-testid="calendar">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl">Calendar</h2>
+        <div className="flex items-center gap-2">
+          <button
+            className="h-8 w-8 rounded-full bg-panel-2 p-0 text-text"
+            onClick={() => setCursor(addMonths(cursor, -1))}
+          >
+            ‹
+          </button>
+          <strong className="min-w-[120px] text-center text-sm font-semibold">
+            {format(cursor, "MMMM yyyy")}
+          </strong>
+          <button
+            className="h-8 w-8 rounded-full bg-panel-2 p-0 text-text"
+            onClick={() => setCursor(addMonths(cursor, 1))}
+          >
+            ›
+          </button>
+          <button className="ml-1" onClick={() => setShowDialog(true)}>
+            + Add
+          </button>
         </div>
       </div>
 
       {!connected && (
-        <div className="card warn">
+        <div className="glass mt-4 border-warm/30 bg-warm/10 p-4 text-sm">
           Google Calendar isn't connected yet. Run{" "}
           <code>python manage.py authorize_google</code> on the server.
         </div>
       )}
 
-      <div className="cal-layout">
-        <div className="cal-grid">
+      <div className="mt-4 grid grid-cols-[1fr_300px] gap-4">
+        <div className="grid grid-cols-7 gap-1.5">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <div key={d} className="cal-head">
+            <div key={d} className="p-1 text-center text-xs font-medium text-muted">
               {d}
             </div>
           ))}
@@ -116,20 +130,30 @@ export default function CalendarPage() {
             <button
               key={day.toISOString()}
               className={[
-                "cal-cell",
-                isSameMonth(day, cursor) ? "" : "other-month",
-                isSameDay(day, selected) ? "selected" : "",
+                "flex min-h-[92px] flex-col items-stretch gap-1 rounded-xl border p-1.5 text-left text-text transition-colors",
+                isSameDay(day, selected)
+                  ? "border-accent bg-panel-2"
+                  : "border-border bg-panel hover:bg-panel-2/70",
+                isSameMonth(day, cursor) ? "" : "opacity-40",
               ].join(" ")}
               onClick={() => setSelected(day)}
             >
-              <span className="cal-date">{format(day, "d")}</span>
+              <span className="text-xs text-muted">{format(day, "d")}</span>
               {eventsOn(day).slice(0, 3).map((e) => (
-                <span key={e.id} className="chip event" title={e.summary}>
+                <span
+                  key={e.id}
+                  className="overflow-hidden truncate rounded-full bg-accent/20 px-1.5 py-0.5 text-[11px] text-accent"
+                  title={e.summary}
+                >
                   {e.summary || "(untitled)"}
                 </span>
               ))}
               {tasksOn(day).slice(0, 2).map((t) => (
-                <span key={t.id} className="chip task" title={t.title}>
+                <span
+                  key={t.id}
+                  className="overflow-hidden truncate rounded-full bg-warm/20 px-1.5 py-0.5 text-[11px] text-warm"
+                  title={t.title}
+                >
                   ☑ {t.title}
                 </span>
               ))}
@@ -171,16 +195,21 @@ function DayDetail({
   onChanged: () => void;
 }) {
   return (
-    <aside className="cal-detail card">
-      <h3>{format(day, "EEEE, d MMM")}</h3>
-      <h4>Events</h4>
-      {events.length === 0 && <p className="muted small">No events.</p>}
-      <ul className="list">
+    <aside className="glass p-4">
+      <h3 className="text-sm font-semibold">{format(day, "EEEE, d MMM")}</h3>
+      <h4 className="mt-4 mb-1 text-xs font-medium tracking-wide text-muted uppercase">
+        Events
+      </h4>
+      {events.length === 0 && <p className="text-xs text-muted">No events.</p>}
+      <ul className="mt-1 list-none p-0">
         {events.map((e) => (
-          <li key={e.id} className="row">
-            <span>{e.summary || "(untitled)"}</span>
+          <li
+            key={e.id}
+            className="flex items-center justify-between gap-3 border-b border-border py-2"
+          >
+            <span className="text-sm">{e.summary || "(untitled)"}</span>
             <button
-              className="danger small"
+              className="bg-bad/90 px-2 py-1 text-xs"
               onClick={async () => {
                 await api.delete(`/calendar/events/${e.id}/`);
                 onChanged();
@@ -191,12 +220,17 @@ function DayDetail({
           </li>
         ))}
       </ul>
-      <h4>Tasks</h4>
-      {tasks.length === 0 && <p className="muted small">No tasks.</p>}
-      <ul className="list">
+      <h4 className="mt-4 mb-1 text-xs font-medium tracking-wide text-muted uppercase">
+        Tasks
+      </h4>
+      {tasks.length === 0 && <p className="text-xs text-muted">No tasks.</p>}
+      <ul className="mt-1 list-none p-0">
         {tasks.map((t) => (
-          <li key={t.id} className="row">
-            <label className="inline">
+          <li
+            key={t.id}
+            className="flex items-center justify-between gap-3 border-b border-border py-2"
+          >
+            <label className="m-0 flex flex-row items-center gap-1.5 text-sm text-text">
               <input
                 type="checkbox"
                 checked={t.status === "completed"}
@@ -212,7 +246,7 @@ function DayDetail({
               {t.title}
             </label>
             <button
-              className="danger small"
+              className="bg-bad/90 px-2 py-1 text-xs"
               onClick={async () => {
                 await api.delete(`/calendar/tasks/${t.id}/`);
                 onChanged();
@@ -272,15 +306,26 @@ function CreateDialog({
   }
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <form className="card modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <h3>New item</h3>
-        <div className="seg">
+    <div
+      className="fixed inset-0 z-10 grid place-items-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <form
+        className="glass w-[380px] max-w-[90vw] p-5"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+      >
+        <h3 className="mb-3 text-base">New item</h3>
+        <div className="mb-2 flex gap-1 rounded-full bg-panel-2 p-1">
           {(["event", "all_day", "task"] as CreateType[]).map((t) => (
             <button
               type="button"
               key={t}
-              className={type === t ? "active" : ""}
+              className={
+                type === t
+                  ? "flex-1 rounded-full bg-accent px-2 py-1.5 text-xs text-[#0b1220]"
+                  : "flex-1 rounded-full bg-transparent px-2 py-1.5 text-xs text-muted"
+              }
               onClick={() => setType(t)}
             >
               {t === "event" ? "Event" : t === "all_day" ? "All-day" : "Task"}
@@ -318,8 +363,12 @@ function CreateDialog({
           </label>
         )}
 
-        <div className="row spread">
-          <button type="button" className="link" onClick={onClose}>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            className="bg-transparent p-1 text-accent"
+            onClick={onClose}
+          >
             Cancel
           </button>
           <button type="submit" disabled={busy}>

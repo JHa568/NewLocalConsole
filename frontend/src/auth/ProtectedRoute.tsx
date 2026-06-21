@@ -5,7 +5,7 @@ export default function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="centered">Loading…</div>;
+    return <div className="grid min-h-screen place-items-center">Loading…</div>;
   }
   if (!user) {
     return <Navigate to="/login" replace />;

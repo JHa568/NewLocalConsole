@@ -26,10 +26,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="centered">
-      <form className="card auth-card" onSubmit={onSubmit}>
-        <h1>NewLocalConsole</h1>
-        <p className="muted">Sign in with your password and security key.</p>
+    <div className="grid min-h-screen place-items-center p-4">
+      <form className="glass w-[360px] p-7" onSubmit={onSubmit}>
+        <span className="mb-4 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-warm to-accent text-base font-bold text-[#0b1220]">
+          NL
+        </span>
+        <h1 className="mt-0 mb-1 text-2xl">NewLocalConsole</h1>
+        <p className="mb-2 text-sm text-muted">
+          Sign in with your password and security key.
+        </p>
 
         <label>
           Username
@@ -51,17 +56,21 @@ export default function LoginPage() {
         </label>
 
         {status === "mfa" && (
-          <p className="muted" role="status">
+          <p className="text-sm text-muted" role="status">
             Touch your YubiKey to continue…
           </p>
         )}
         {error && (
-          <p className="error" role="alert">
+          <p className="text-sm text-bad" role="alert">
             {error}
           </p>
         )}
 
-        <button type="submit" disabled={status === "submitting" || status === "mfa"}>
+        <button
+          type="submit"
+          className="mt-2 w-full"
+          disabled={status === "submitting" || status === "mfa"}
+        >
           {status === "idle" ? "Sign in" : "Verifying…"}
         </button>
       </form>

@@ -45,42 +45,42 @@ export default function RegisterKeyPage() {
   }
 
   return (
-    <div className="page">
-      <h2>Security keys</h2>
-      <p className="muted">
+    <div className="p-6">
+      <h2 className="mb-1 text-xl">Security keys</h2>
+      <p className="mb-4 text-sm text-muted">
         Register a YubiKey to use as your second factor. You'll be asked to touch
         it whenever you sign in.
       </p>
 
-      <form className="card" onSubmit={onRegister}>
-        <label>
+      <form className="glass mb-4 flex flex-wrap items-end gap-3 p-4" onSubmit={onRegister}>
+        <label className="my-0 min-w-[160px] flex-1">
           Key name
           <input value={name} onChange={(e) => setName(e.target.value)} required />
         </label>
-        {error && <p className="error">{error}</p>}
+        {error && <p className="text-sm text-bad">{error}</p>}
         <button type="submit" disabled={status === "registering"}>
           {status === "registering" ? "Touch your key…" : "Register a new key"}
         </button>
       </form>
 
-      <ul className="key-list">
+      <ul className="mt-2 flex flex-col gap-3 list-none p-0">
         {credentials.map((c) => (
-          <li key={c.id} className="card row">
+          <li key={c.id} className="glass flex items-center justify-between gap-3 p-4">
             <div>
               <strong>{c.name}</strong>
-              <div className="muted small">
+              <div className="text-xs text-muted">
                 Added {new Date(c.created_at).toLocaleDateString()}
                 {c.last_used_at &&
                   ` · last used ${new Date(c.last_used_at).toLocaleDateString()}`}
               </div>
             </div>
-            <button className="danger" onClick={() => onDelete(c.id)}>
+            <button className="bg-bad/90 px-3 py-1.5 text-xs" onClick={() => onDelete(c.id)}>
               Remove
             </button>
           </li>
         ))}
         {credentials.length === 0 && (
-          <li className="muted">No security keys registered yet.</li>
+          <li className="text-sm text-muted">No security keys registered yet.</li>
         )}
       </ul>
     </div>
