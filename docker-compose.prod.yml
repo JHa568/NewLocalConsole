@@ -1,38 +1,30 @@
+# Production stack. Connects to the EXTERNAL shared Postgres (no local DB
+# container). DB creds + Django secret are injected by the deploy workflow from
+# GitHub Actions secrets; ALLOWED_HOSTS / CORS / POSTGRES_DB come from repo vars.
+# See DEPLOY.md.
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: patientia
-      POSTGRES_USER: patientia
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U patientia"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-
   backend:
     image: patientia-backend:prod
     build:
       context: ./backend
       target: prod
-    env_file:
-      - ./backend/.env
     environment:
+      DJANGO_ENV: prod
       DEBUG: "False"
-      POSTGRES_DB: patientia
-      POSTGRES_USER: patientia
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
+      SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
+      # Shared hosted Postgres.
+      POSTGRES_DB: ${POSTGRES_DB:-patientia}
+      POSTGRES_USER: ${SECRET_DB_USERNAME:?set SECRET_DB_USERNAME}
+      POSTGRES_PASSWORD: ${SECRET_DB_PASSWORD:?set SECRET_DB_PASSWORD}
+      POSTGRES_HOST: ${SECRET_DB_ADDRESS:?set SECRET_DB_ADDRESS}
+      POSTGRES_PORT: ${SECRET_DB_PORT:-5432}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
-    depends_on:
-      postgres:
-        condition: service_healthy
+      # Google OAuth files mounted from ./secrets on the server.
+      GOOGLE_CLIENT_SECRETS_PATH: /secrets/client_secrets.json
+      GOOGLE_TOKEN_PATH: /secrets/token.json
+    volumes:
+      - ./secrets:/secrets
     restart: unless-stopped
 
   frontend:
@@ -45,6 +37,3 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-  postgres_data:

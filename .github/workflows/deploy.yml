@@ -1,0 +1,42 @@
+name: CI/CD Docker Compose
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Never run two deploys at once; let an in-flight one finish.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: development
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Keep untracked server files (secrets/, manual .env) between deploys.
+          clean: false
+
+      - name: Deploy prod stack
+        env:
+          # Django
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          # Shared hosted Postgres (reuse the existing development-env secrets).
+          SECRET_DB_USERNAME: ${{ secrets.SECRET_DB_USERNAME }}
+          SECRET_DB_PASSWORD: ${{ secrets.SECRET_DB_PASSWORD }}
+          SECRET_DB_ADDRESS: ${{ secrets.SECRET_DB_ADDRESS }}
+          SECRET_DB_PORT: ${{ secrets.SECRET_DB_PORT }}
+          # Non-secret config (repo/environment Variables).
+          POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+          ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+          CORS_ALLOWED_ORIGINS: ${{ vars.CORS_ALLOWED_ORIGINS }}
+        run: |
+          docker compose -f docker-compose.prod.yml down --remove-orphans
+          docker compose -f docker-compose.prod.yml up -d backend frontend --build
+
+      - name: Status
+        if: ${{ always() }}
+        run: docker compose -f docker-compose.prod.yml ps

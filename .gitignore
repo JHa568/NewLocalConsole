@@ -12,6 +12,10 @@ backend/client_secrets.json
 backend/token.json
 backend/staticfiles/
 
+# Deploy / server-side secrets (compose env + mounted Google OAuth files)
+/.env
+/secrets/
+
 # Node
 node_modules/
 frontend/dist/

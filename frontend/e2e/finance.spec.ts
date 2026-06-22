@@ -35,14 +35,15 @@ test("add income, stock position, and see portfolio value on the dashboard", asy
   // Dashboard reflects the portfolio value (5 * 100 = 500).
   await page.getByRole("link", { name: "Dashboard" }).click();
   await expect(page.getByTestId("dashboard")).toBeVisible();
-  await expect(page.getByText("VAS.AX")).toBeVisible();
+  await expect(page.getByRole("cell", { name: "VAS.AX" })).toBeVisible();
 });
 
 test("toggle rent paid status", async ({ page }) => {
   await page.goto("/finance");
+  // The rent form is the only Finance form with a date input.
   const rentForm = page
-    .locator("section", { hasText: "Rent" })
-    .locator("form.inline-form");
+    .locator("form")
+    .filter({ has: page.locator('input[type="date"]') });
   await rentForm.locator('input[type="date"]').fill("2026-07-01");
   await rentForm.locator('input[type="number"]').fill("2200");
   await rentForm.getByRole("button", { name: "Add" }).click();
