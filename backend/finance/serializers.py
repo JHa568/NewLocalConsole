@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from . import prices
 from .models import IncomeRecord, ManualBalance, RentPayment, StockPosition
 
 
@@ -36,7 +37,7 @@ class RentPaymentSerializer(serializers.ModelSerializer):
 
 
 class StockPositionSerializer(serializers.ModelSerializer):
-    # Live-price fields, populated by the view.
+    # Live-price fields, enriched in to_representation() from the price provider.
     price = serializers.FloatField(read_only=True)
     currency = serializers.CharField(read_only=True)
     change_pct = serializers.FloatField(read_only=True)
@@ -63,6 +64,20 @@ class StockPositionSerializer(serializers.ModelSerializer):
             "market_value",
             "created_at",
         ]
+
+    def to_representation(self, instance):
+        # The four live-price fields have no model attribute, so the base
+        # representation skips them; we attach a (cached) quote here.
+        data = super().to_representation(instance)
+        quote = prices.get_quote(instance.ticker)
+        price = quote.get("price")
+        data["price"] = price
+        data["currency"] = quote.get("currency")
+        data["change_pct"] = quote.get("change_pct")
+        data["market_value"] = (
+            round(price * float(instance.quantity), 2) if price is not None else None
+        )
+        return data
 
 
 class ManualBalanceSerializer(serializers.ModelSerializer):

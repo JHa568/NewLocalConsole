@@ -1,5 +1,9 @@
 """
-Django settings for the Patientia project.
+Base Django settings for the Patientia project.
+
+Shared by every environment. ``dev`` and ``prod`` import from here; the active
+module is selected in ``config/settings/__init__.py`` via the ``DJANGO_ENV`` env
+var (defaults to ``dev``).
 """
 
 import os
@@ -8,7 +12,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# config/settings/base.py -> config/settings -> config -> backend/
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
@@ -29,10 +34,9 @@ def env_list(key, default=""):
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
-SECRET_KEY = env(
-    "SECRET_KEY",
-    "django-insecure-dev-only-_s2rde&=itbd7-s23h=3fpj+$z3x*5@qza_#xk&3h9",
-)
+# A clearly-labelled dev fallback. prod.py refuses to boot if this is still in use.
+INSECURE_SECRET_KEY = "django-insecure-dev-only-_s2rde&=itbd7-s23h=3fpj+$z3x*5@qza_#xk&3h9"
+SECRET_KEY = env("SECRET_KEY", INSECURE_SECRET_KEY)
 
 DEBUG = env_bool("DEBUG", True)
 
@@ -56,6 +60,7 @@ INSTALLED_APPS = [
     "accounts",
     "finance",
     "calendar_app",
+    "pomodoro",
 ]
 
 MIDDLEWARE = [
@@ -143,6 +148,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "EXCEPTION_HANDLER": "calendar_app.exceptions.google_exception_handler",
 }
 
 SIMPLE_JWT = {
@@ -194,4 +200,26 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "patientia-cache",
     }
+}
+
+
+# ---------------------------------------------------------------------------
+# Logging — console handler so external-API and auth failures are visible.
+# ---------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {"format": "{levelname} {name}: {message}", "style": "{"},
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "simple"},
+    },
+    "root": {"handlers": ["console"], "level": env("LOG_LEVEL", "INFO")},
+    "loggers": {
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "accounts": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "calendar_app": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "finance": {"handlers": ["console"], "level": "INFO", "propagate": False},
+    },
 }

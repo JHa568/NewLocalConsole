@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import AmbientMusicPlayer from "./AmbientMusicPlayer";
 import Logo from "./Logo";
 
 function Icon({ d, animKey }: { d: string; animKey: string }) {
@@ -38,6 +39,12 @@ const TABS = [
     label: "Calendar",
     icon: "M3 10h18M8 2v4M16 2v4M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z",
     animKey: "calendar",
+  },
+  {
+    to: "/pomodoro",
+    label: "Pomodoro",
+    icon: "M12 6v6l4 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zM9 2h6",
+    animKey: "pomodoro",
   },
   {
     to: "/console",
@@ -118,6 +125,8 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      {/* Persistent: lives outside the routed Outlet so lofi survives navigation. */}
+      <AmbientMusicPlayer />
     </div>
   );
 }

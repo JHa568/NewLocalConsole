@@ -1,3 +1,5 @@
+import Notice from "../components/ui/Notice";
+
 const CASAOS_URL = import.meta.env.VITE_CASAOS_URL ?? "";
 
 export default function Console() {
@@ -5,10 +7,10 @@ export default function Console() {
     return (
       <div className="p-6">
         <h2>Console</h2>
-        <div className="glass mt-4 border-warm/30 bg-warm/10 p-4 text-sm">
+        <Notice className="mt-4">
           No CasaOS URL configured. Set <code>VITE_CASAOS_URL</code> in your
           frontend environment to embed CasaOS here.
-        </div>
+        </Notice>
       </div>
     );
   }

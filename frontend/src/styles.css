@@ -127,6 +127,13 @@ html[data-theme="light"] {
   50% { transform: rotateX(35deg) scaleY(0.7); }
 }
 
+@keyframes nav-icon-pomodoro {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-10deg); }
+  50% { transform: rotate(8deg); }
+  80% { transform: rotate(-4deg); }
+}
+
 @keyframes nav-icon-console {
   0%, 100% { transform: translateX(0); }
   30% { transform: translateX(4px); }
@@ -152,6 +159,9 @@ html[data-theme="light"] {
 .group:hover .nav-icon-calendar {
   animation: nav-icon-calendar 0.5s ease-in-out;
   perspective: 40px;
+}
+.group:hover .nav-icon-pomodoro {
+  animation: nav-icon-pomodoro 0.6s ease-in-out;
 }
 .group:hover .nav-icon-console {
   animation: nav-icon-console 0.45s ease-in-out;

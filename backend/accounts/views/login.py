@@ -1,3 +1,4 @@
+import logging
 import secrets
 
 from django.contrib.auth import authenticate, get_user_model
@@ -10,15 +11,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from . import webauthn_service
-from .models import WebAuthnCredential
-from .serializers import (
-    LoginSerializer,
-    MfaVerifySerializer,
-    RegisterCompleteSerializer,
-    UserSerializer,
-    WebAuthnCredentialSerializer,
-)
+from .. import webauthn_service
+from ..models import WebAuthnCredential
+from ..serializers import LoginSerializer, MfaVerifySerializer, UserSerializer
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -116,6 +113,7 @@ class LoginVerifyView(APIView):
                 credential_model, credential, challenge
             )
         except Exception:
+            logger.warning("WebAuthn authentication failed", exc_info=True)
             return Response(
                 {"detail": "Security key verification failed."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -147,70 +145,3 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(UserSerializer(request.user).data)
-
-
-class RegisterBeginView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        existing = list(request.user.webauthn_credentials.all())
-        options, challenge_token = webauthn_service.begin_registration(
-            request.user, existing
-        )
-        return Response({"webauthn_options": options, "challenge_token": challenge_token})
-
-
-class RegisterCompleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = RegisterCompleteSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        challenge_token = request.data.get("challenge_token")
-        challenge = webauthn_service.pop_challenge(challenge_token or "")
-        if challenge is None:
-            return Response(
-                {"detail": "Registration challenge expired. Try again."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            data = webauthn_service.finish_registration(
-                serializer.validated_data["credential"], challenge
-            )
-        except Exception:
-            return Response(
-                {"detail": "Could not verify the security key."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        credential = WebAuthnCredential.objects.create(
-            user=request.user,
-            credential_id=data["credential_id"],
-            public_key=data["public_key"],
-            sign_count=data["sign_count"],
-            transports=data["transports"],
-            name=serializer.validated_data.get("name") or "Security key",
-        )
-        return Response(
-            WebAuthnCredentialSerializer(credential).data,
-            status=status.HTTP_201_CREATED,
-        )
-
-
-class CredentialListView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        creds = request.user.webauthn_credentials.all()
-        return Response(WebAuthnCredentialSerializer(creds, many=True).data)
-
-
-class CredentialDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, pk):
-        deleted, _ = request.user.webauthn_credentials.filter(pk=pk).delete()
-        if not deleted:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        return Response(status=status.HTTP_204_NO_CONTENT)

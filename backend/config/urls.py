@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/auth/", include("accounts.urls")),
     path("api/finance/", include("finance.urls")),
     path("api/calendar/", include("calendar_app.urls")),
+    path("api/pomodoro/", include("pomodoro.urls")),
 ]
